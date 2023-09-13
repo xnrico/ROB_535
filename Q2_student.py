@@ -82,12 +82,10 @@ def sim_car_euler():
 
     # Periodic control inputs
     def periodic_delta(t):
-        t = np.array(t)
-        return 0.1 * np.sin(0.5 * t)
+        return 0.1 * np.sin(0.5 * np.float64(t))
 
     def periodic_a(t):
-        t = np.array(t)
-        return 0.1 * np.cos(0.25 * t)
+        return 0.1 * np.cos(0.25 * np.float64(t))
 
     # Initial state
     y = np.array([0, 0, 0, 1])  # [x, y, psi, v]
@@ -104,6 +102,6 @@ def sim_car_euler():
         results[i] = y
         time[i] = i * dt
         # predict the next state using explicit Euler integration scheme
-        y = y + dt * car_model(y, delta, a) # TODO
+        y = y + dt * np.array(car_model(y, delta, a)) # TODO
 
     return time, results

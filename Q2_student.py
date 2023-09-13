@@ -59,7 +59,7 @@ def sim_car_control():
     t_span = [0, 20]  # 20 seconds
     # Time points for evaluation (t_eval)
     t_eval = np.arange(0, 20, 0.01)
-    sol = solve_ivp(lambda t, y: car_model(t, y, delta_func, a_func), t_span, y0, t_eval=t_eval)
+    sol = solve_ivp(lambda t, y: car_model(t, y, periodic_delta(t), periodic_a(t)), t_span, y0, t_eval=t_eval)
 
     return sol
 
@@ -100,6 +100,6 @@ def sim_car_euler():
         results[i] = y
         time[i] = i * dt
         # predict the next state using explicit Euler integration scheme
-        y = # TODO
+        y = results[i-1] + dt * car_model(results[i-1], delta, a) # TODO
 
     return time, results

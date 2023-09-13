@@ -100,6 +100,6 @@ def sim_car_euler():
         results[i] = y
         time[i] = i * dt
         # predict the next state using explicit Euler integration scheme
-        y = results[i-1] + dt * car_model(results[i-1], delta, a) # TODO
+        y = results[i] + dt * car_model(results[i], delta, a) # TODO
 
     return time, results

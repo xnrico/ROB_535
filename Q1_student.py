@@ -21,7 +21,7 @@ def linear_ode(A):
     state_history = [x0]
     for _ in range(num_steps):
         # use exp_A and x[k] to predict the x[k+1]
-        x_next = exp_A * state_history[-1]# TODO
+        x_next = exp_A @ state_history[-1]# TODO
         state_history.append(x_next)
 
     # Extract x and y coordinates for the phase portrait

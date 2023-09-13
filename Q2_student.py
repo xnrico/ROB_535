@@ -40,7 +40,7 @@ def sim_car_control():
         delta = delta_func # TODO
         a = a_func # TODO
         dp1_dt = v * np.cos(psi) # TODO
-        dp2_dt = v* np.sin(psi) # TODO
+        dp2_dt = v * np.sin(psi) # TODO
         dpsi_dt = v / L * np.tan(delta) # TODO
         dv_dt = a # TODO
         return [dp1_dt, dp2_dt, dpsi_dt, dv_dt]
@@ -50,9 +50,11 @@ def sim_car_control():
 
     # Periodic control inputs
     def periodic_delta(t):
+        t = np.array(t)
         return 0.1 * np.sin(0.5 * t)
 
     def periodic_a(t):
+        t = np.array(t)
         return 0.1 * np.cos(0.25 * t)
 
     # Integrate system dynamics
@@ -73,16 +75,18 @@ def sim_car_euler():
     def car_model(y, delta, a):
         p1, p2, psi, v = y
         dp1_dt = v * np.cos(psi) # TODO
-        dp2_dt = v* np.sin(psi) # TODO
+        dp2_dt = v * np.sin(psi) # TODO
         dpsi_dt = v / L * np.tan(delta) # TODO
         dv_dt = a # TODO
         return [dp1_dt, dp2_dt, dpsi_dt, dv_dt]
 
     # Periodic control inputs
     def periodic_delta(t):
+        t = np.array(t)
         return 0.1 * np.sin(0.5 * t)
 
     def periodic_a(t):
+        t = np.array(t)
         return 0.1 * np.cos(0.25 * t)
 
     # Initial state
@@ -100,6 +104,6 @@ def sim_car_euler():
         results[i] = y
         time[i] = i * dt
         # predict the next state using explicit Euler integration scheme
-        y = results[i] + dt * car_model(results[i], delta, a) # TODO
+        y = y + dt * car_model(y, delta, a) # TODO
 
     return time, results

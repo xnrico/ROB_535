@@ -11,9 +11,9 @@ def Student_Controller(t, x, param):
     v = x[1]
 
     ## TODO
-    lam = 0.8
-    alpha = 3
-    w = 100
+    lam = 0.95
+    alpha = 1e-3
+    w = 3e9
     h = (v - vd)**2 / 2
     B = D - 1/2 * (v0 - v)**2 / Cdg - 1.8*v
     # other ...

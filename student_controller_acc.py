@@ -11,9 +11,9 @@ def Student_Controller(t, x, param):
     v = x[1]
 
     ## TODO
-    lam = 3
-    alpha = 3.125
-    w = 5e6
+    lam = 50
+    alpha = 0.25
+    w = 1e5
     h = 1/2 * ((v - vd)**2)
     B = D - 1/2 * ((v0 - v)**2) / Cdg - 1.8*v
     # other ...
@@ -23,14 +23,14 @@ def Student_Controller(t, x, param):
     
     ## TODO
     A = np.array([[(v - vd)/m, -1],
-                  [1/m * (1.8 + (v-v0)/Cdg), 0],
-                  [1/m , 0],
-                  [-1/m , 0],
+                  [(1.8 + (v-v0)/Cdg)/m, 0],
+                  [1 , 0],
+                  [-1 , 0],
                   [0, -1]
                   ])
 
     ## TODO
-    b = np.array([-lam*h, alpha*B + (v0-v), Cag-1e-5, Cdg, 0])
+    b = np.array([-lam*h, alpha*B + (v0-v), (Cag-1e-5)*m, Cdg*m, 0])
 
     ## TODO
     q = np.zeros([2, 1])

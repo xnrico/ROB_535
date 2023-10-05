@@ -50,9 +50,9 @@ def Student_Controller_LQR(x_bar, u_bar, x0, Fun_Jac_dt, param):
     dim_state = x_bar.shape[1]
     N = len(x_bar) - 1  # Preview horizon
 
-    p = 5
-    q = 300
-    r = 20
+    p = 0.1
+    q = 800
+    r = 2e3
 
     P = np.eye(dim_state) * p
     Q = np.eye(dim_state) * q

@@ -47,9 +47,9 @@ def Student_Controller_LQR(x_bar, u_bar, x0, Fun_Jac_dt, param):
     dim_state = x_bar.shape[1]
     N = len(x_bar) - 1  # Preview horizon
 
-    p = 100
+    p = 500
     q = 1
-    r = 20
+    r = 150
 
     P = np.eye(dim_state) * p
     Q = np.eye(dim_state) * q
@@ -107,9 +107,9 @@ def Student_Controller_CMPC(x_bar, u_bar, x0, Fun_Jac_dt, param):
     u_min = np.array([a_lim_lower, delta_lim_lower])
     u_max = np.array([a_lim_upper, delta_lim_upper]) # MPC Inequality Parameters
 
-    p = 100
+    p = 500
     q = 1
-    r = 20
+    r = 150
 
     P = np.eye(dim_state) * p
     Q = np.eye(dim_state) * q

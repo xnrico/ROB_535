@@ -1,7 +1,10 @@
 import numpy as np
 import cvxpy as cp
 
-def Setup_Derivative(x_bar, u_bar, param, control=False):
+def Setup_Derivative(param):
+    return None
+
+def Derivative(x_bar, u_bar, param, control=False):
     ## this function is optional
     h = param["h"]
     T = param["T"]
@@ -76,8 +79,8 @@ def Student_Controller_LQR(x_bar, u_bar, x0, Fun_Jac_dt, param):
     # Define the constraints
     constraints = []
     for k in range(N):
-        A_k = Fun_Jac_dt(x_bar[k], u_bar[k], control=False)  # Compute A_k matrix
-        B_k = Fun_Jac_dt(x_bar[k], u_bar[k], control=True)  # Compute B_k matrix
+        A_k = Derivative(x_bar[k], u_bar[k], param, control=False)  # Compute A_k matrix
+        B_k = Derivative(x_bar[k], u_bar[k], param, control=True)  # Compute B_k matrix
 
         # State dynamics constraint
         state_constraint = delta_s[k + 1] == A_k @ delta_s[k] + B_k @ delta_u[k]

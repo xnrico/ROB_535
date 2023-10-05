@@ -33,8 +33,8 @@ def Derivative(x_bar, u_bar, param, control=False):
             [0, 0, 1, (dt * np.arctan(delta)) / (((L_r**2 * np.arctan(delta)**2) / (L_f + L_r)**2 + 1)**(1/2) * (L_f + L_r))],
             [0, 0, 0, 1]
         ])
-
         result = A
+
     else:
         B = np.array([
             [0, -(dt * L_r * v * np.sin(psi + beta)) / ((delta**2 + 1) * ((L_r**2 * np.arctan(delta)**2) / (L_f + L_r)**2 + 1) * (L_f + L_r))],
@@ -53,8 +53,8 @@ def Student_Controller_LQR(x_bar, u_bar, x0, Fun_Jac_dt, param):
     dim_state = x_bar.shape[1]
     N = len(x_bar) - 1  # Preview horizon
 
-    p = 0.1
-    q = 800
+    p = 1
+    q = 760
     r = 2e3
 
     P = np.eye(dim_state) * p

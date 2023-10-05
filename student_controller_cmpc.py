@@ -7,19 +7,13 @@ def Setup_Derivative(param):
 def Derivative(x_bar, u_bar, param, control=False):
     ## this function is optional
     h = param["h"]
-    T = param["T"]
     L_f = param["L_f"]
     L_r = param["L_r"]
-    a_lim = param["a_lim"]
-    delta_lim = param["delta_lim"]
 
     dt = h
-    x = x_bar[0]
-    y = x_bar[1]
     psi = x_bar[2]
     v = x_bar[3]
-    delta = u_bar[0]
-    alpha = u_bar[1]
+    delta = u_bar[1]
     beta = np.arctan((L_r * np.arctan(delta)) / (L_f + L_r))
 
     A = np.zeros([4, 4])
@@ -53,9 +47,9 @@ def Student_Controller_LQR(x_bar, u_bar, x0, Fun_Jac_dt, param):
     dim_state = x_bar.shape[1]
     N = len(x_bar) - 1  # Preview horizon
 
-    p = 1
-    q = 760
-    r = 2e3
+    p = 100
+    q = 1
+    r = 20
 
     P = np.eye(dim_state) * p
     Q = np.eye(dim_state) * q
@@ -98,14 +92,73 @@ def Student_Controller_LQR(x_bar, u_bar, x0, Fun_Jac_dt, param):
     delta_u_opt = [u_var.value for u_var in delta_u]
     u_act = u_bar[0] + np.array(delta_u_opt[0])
 
-    return u_act
-
     return u_act # TODO 
 
 def Student_Controller_CMPC(x_bar, u_bar, x0, Fun_Jac_dt, param):
     # TODO
+    dim_ctrl = u_bar.shape[1]
+    dim_state = x_bar.shape[1]
+    N = len(x_bar) - 1  # Preview horizon
 
-    return # TODO
+    a_lim_lower = param["a_lim"][0]
+    a_lim_upper = param["a_lim"][1]
+    delta_lim_lower = param["delta_lim"][0]
+    delta_lim_upper = param["delta_lim"][1]
+    u_min = np.array([a_lim_lower, delta_lim_lower])
+    u_max = np.array([a_lim_upper, delta_lim_upper]) # MPC Inequality Parameters
+
+    p = 100
+    q = 1
+    r = 20
+
+    P = np.eye(dim_state) * p
+    Q = np.eye(dim_state) * q
+    R = np.eye(dim_ctrl) * r
+
+    # Initialize variables
+    delta_s = []  # State perturbations
+    delta_u = []  # Control perturbations
+
+    for k in range(N):
+        delta_s.append(cp.Variable(4))
+        delta_u.append(cp.Variable(2))
+    delta_s.append(cp.Variable(4))
+
+    # Define the cost function
+    cost = 0
+    for k in range(N):
+        cost += cp.quad_form(delta_s[k], Q) + cp.quad_form(delta_u[k], R)
+    cost += cp.quad_form(delta_s[N], P)  # Terminal cost
+
+    # Define the constraints
+    constraints = []
+    for k in range(N):
+        A_k = Derivative(x_bar[k], u_bar[k], param, control=False)  # Compute A_k matrix
+        B_k = Derivative(x_bar[k], u_bar[k], param, control=True)  # Compute B_k matrix
+
+        # State dynamics constraint
+        state_constraint = delta_s[k + 1] == A_k @ delta_s[k] + B_k @ delta_u[k]
+        constraints.append(state_constraint)
+
+        # Input constraints
+        input_constraint_1 = delta_u[k] <= u_max - u_bar[k]
+        input_constraint_2 = delta_u[k] <= u_bar[k] - u_min
+        constraints.append(input_constraint_1)
+        constraints.append(input_constraint_2)
+
+    # Initial state constraint
+    constraints.append(delta_s[0] == x0 - x_bar[0])
+
+    # Create the optimization problem
+    prob = cp.Problem(cp.Minimize(cost), constraints)
+
+    # Solve the problem
+    prob.solve()
+
+    delta_u_opt = [u_var.value for u_var in delta_u]
+    u_act = u_bar[0] + np.array(delta_u_opt[0])
+
+    return u_act # TODO
 
     # A = np.zeros([4, 4])
     # B = np.zeros([4, 2])

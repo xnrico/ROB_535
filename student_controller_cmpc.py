@@ -49,7 +49,7 @@ def Student_Controller_LQR(x_bar, u_bar, x0, Fun_Jac_dt, param):
 
     p = 10000
     q = 300
-    r = 150
+    r = 750
 
     P = np.eye(dim_state) * p
     Q = np.eye(dim_state) * q

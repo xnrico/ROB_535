@@ -6,8 +6,8 @@ import time
 
 def nmpc_controller():
     # Declare simulation constants
-    T = 4 # TODO: You are supposed to design the planning horizon
-    N = 40 # TODO  You are supposed to design the planning horizon
+    T = 20 # TODO: You are supposed to design the planning horizon
+    N = 100 # TODO  You are supposed to design the planning horizon
     h = T / N # TODO: What is the time interval for simulation? 
 
     # system dimensions
@@ -87,7 +87,7 @@ def nmpc_controller():
     for k in range(N):
         #### collision avoidance:
         # TODO
-        dist = (x[0, k]/30)**2 + (x[1, k]/2.5)**2 - 1
+        dist = (x[0, k]/31)**2 + (x[1, k]/2.25)**2 - 1
         cons_state.append(-dist) # TODO)
 
         #### Maximum lateral acceleration ####
@@ -99,18 +99,18 @@ def nmpc_controller():
         cons_state.append(-ay - gmu) # TODO)
 
         #### lane keeping ####
-        cons_state.append(x[1, k] - 2.6) # TODO)
-        cons_state.append(-x[1, k] - 1) # TODO)
+        cons_state.append(x[1, k] - 2.75) # TODO)
+        cons_state.append(-x[1, k] - 0.75) # TODO)
 
         #### steering rate ####
         if k >= 1:
             d_delta = (u[1, k] - u[1, k-1]) / h # TODO
-            cons_state.append(d_delta - 0.55)  # TODO)
-            cons_state.append(-d_delta - 0.55)  # TODO)
+            cons_state.append(d_delta - 0.6)  # TODO)
+            cons_state.append(-d_delta - 0.6)  # TODO)
         else:
             d_delta = u[1, 0] - delta_last # TODO, for the first input, given d_last from param
-            cons_state.append(d_delta - 0.55)  # TODO)
-            cons_state.append(-d_delta - 0.55)  # TODO)
+            cons_state.append(d_delta - 0.6)  # TODO)
+            cons_state.append(-d_delta - 0.6)  # TODO)
 
     ub_state_cons = np.zeros((len(cons_state), 1))
     lb_state_cons = np.zeros((len(cons_state), 1)) - 1e5
@@ -135,4 +135,4 @@ def nmpc_controller():
     # Create an NLP solver
     prob = {"x": vars_NLP, "p":par, "f": J, "g":cons_NLP}
     
-    return prob, N, vars_NLP.shape[0], cons_NLP.shape[0], par.shape[0], lb_var, ub_var, lb_cons, ub_cons  
+    return prob, N, vars_NLP.shape[0], cons_NLP.shape[0], par.shape[0], lb_var, ub_var, lb_cons, ub_cons

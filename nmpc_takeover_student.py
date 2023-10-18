@@ -99,8 +99,8 @@ def nmpc_controller():
         cons_state.append(-ay - gmu) # TODO)
 
         #### lane keeping ####
-        cons_state.append(x[1, k] - 2.75) # TODO)
-        cons_state.append(-x[1, k] - 0.75) # TODO)
+        cons_state.append(x[1, k] - 2.55) # TODO)
+        cons_state.append(-x[1, k] - 0.55) # TODO)
 
         #### steering rate ####
         if k >= 1:

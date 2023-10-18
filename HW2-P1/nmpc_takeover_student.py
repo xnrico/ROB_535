@@ -50,14 +50,14 @@ def nmpc_controller():
     r = 1
 
     P = p * ((v_des - x_model[3])**2 + x_model[1]**2) # TODO
-    L = q * (v_des - x_model[3])**2 + q * xdot[1]**2 + q * xdot[2]**2 + q * x_model[1]**2 + r * u_model[0]**2 + 2*r *u_model[1] # TODO
+    L = q * (v_des - x_model[3])**2 + q * xdot[1]**2 + q * xdot[2]**2 + q * x_model[1]**2 + r * u_model[0]**2 + 0.5*r *u_model[1] # TODO
 
     Fun_cost_terminal = ca.Function('P', [x_model, par], [P])
     Fun_cost_running = ca.Function('Q', [x_model, u_model, par], [L])
 
     # state and control constraints
-    state_ub = np.array([ 1e4,  3,  1.57,  200]) # TODO 
-    state_lb = np.array([ -1e4,  -1,  -1.57,  -200]) # TODO  ???
+    state_ub = np.array([ 1e4,  3,  3.14,  200]) # TODO 
+    state_lb = np.array([ -1e4,  -1,  -3.14,  -200]) # TODO  ???
     ctrl_ub  = np.array([4, 0.6]) # TODO 
     ctrl_lb  = np.array([-10, -0.6]) # TODO 
     
@@ -87,7 +87,7 @@ def nmpc_controller():
     for k in range(N):
         #### collision avoidance:
         # TODO
-        dist = (x[0, k]/30)**2 + (x[1, k]/2.4)**2 - 1
+        dist = (x[0, k]/31.5)**2 + (x[1, k]/2.4)**2 - 1
         cons_state.append(-dist) # TODO)
 
         #### Maximum lateral acceleration ####
@@ -99,7 +99,7 @@ def nmpc_controller():
         cons_state.append(-ay - gmu) # TODO)
 
         #### lane keeping ####
-        cons_state.append(x[1, k] - 2.6) # TODO)
+        cons_state.append(x[1, k] - 2.75) # TODO)
         cons_state.append(-x[1, k] - 1) # TODO)
 
         #### steering rate ####

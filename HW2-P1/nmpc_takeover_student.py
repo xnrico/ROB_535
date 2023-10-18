@@ -6,8 +6,8 @@ import time
 
 def nmpc_controller():
     # Declare simulation constants
-    T = 20 # TODO: You are supposed to design the planning horizon
-    N = 100 # TODO  You are supposed to design the planning horizon
+    T = 15 # TODO: You are supposed to design the planning horizon
+    N = 150 # TODO  You are supposed to design the planning horizon
     h = T / N # TODO: What is the time interval for simulation? 
 
     # system dimensions
@@ -87,7 +87,7 @@ def nmpc_controller():
     for k in range(N):
         #### collision avoidance:
         # TODO
-        dist = (x[0, k]/32)**2 + (x[1, k]/2.4)**2 - 1
+        dist = (x[0, k]/30)**2 + (x[1, k]/2.4)**2 - 1
         cons_state.append(-dist) # TODO)
 
         #### Maximum lateral acceleration ####
@@ -105,12 +105,12 @@ def nmpc_controller():
         #### steering rate ####
         if k >= 1:
             d_delta = (u[1, k] - u[1, k-1]) / h # TODO
-            cons_state.append(d_delta - 0.6)  # TODO)
-            cons_state.append(-d_delta - 0.6)  # TODO)
+            cons_state.append(d_delta - 0.55)  # TODO)
+            cons_state.append(-d_delta - 0.55)  # TODO)
         else:
             d_delta = u[1, 0] - delta_last # TODO, for the first input, given d_last from param
-            cons_state.append(d_delta - 0.6)  # TODO)
-            cons_state.append(-d_delta - 0.6)  # TODO)
+            cons_state.append(d_delta - 0.55)  # TODO)
+            cons_state.append(-d_delta - 0.55)  # TODO)
 
     ub_state_cons = np.zeros((len(cons_state), 1))
     lb_state_cons = np.zeros((len(cons_state), 1)) - 1e5

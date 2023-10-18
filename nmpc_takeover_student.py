@@ -87,7 +87,7 @@ def nmpc_controller():
     for k in range(N):
         #### collision avoidance:
         # TODO
-        dist = (x[0, k]/30)**2 + (x[1, k]/2)**2 - 1
+        dist = (x[0, k]/31)**2 + (x[1, k]/2.25)**2 - 1
         cons_state.append(-dist) # TODO)
 
         #### Maximum lateral acceleration ####
@@ -99,8 +99,8 @@ def nmpc_controller():
         cons_state.append(-ay - gmu) # TODO)
 
         #### lane keeping ####
-        cons_state.append(x[1, k] - 3) # TODO)
-        cons_state.append(-x[1, k] - 1) # TODO)
+        cons_state.append(x[1, k] - 2.75) # TODO)
+        cons_state.append(-x[1, k] - 0.75) # TODO)
 
         #### steering rate ####
         if k >= 1:

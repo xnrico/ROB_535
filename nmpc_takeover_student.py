@@ -6,8 +6,8 @@ import time
 
 def nmpc_controller():
     # Declare simulation constants
-    T = 20 # TODO: You are supposed to design the planning horizon
-    N = 100 # TODO  You are supposed to design the planning horizon
+    T = 4 # TODO: You are supposed to design the planning horizon
+    N = 40 # TODO  You are supposed to design the planning horizon
     h = T / N # TODO: What is the time interval for simulation? 
 
     # system dimensions

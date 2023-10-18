@@ -6,7 +6,7 @@ import time
 
 def nmpc_controller():
     # Declare simulation constants
-    T = 4 # TODO: You are supposed to design the planning horizon
+    T = 8 # TODO: You are supposed to design the planning horizon
     N = 40 # TODO  You are supposed to design the planning horizon
     h = T / N # TODO: What is the time interval for simulation? 
 
@@ -46,7 +46,7 @@ def nmpc_controller():
 
     # Keep in the same lane and take over it while maintaing a high speed
     p = 100
-    q = 40
+    q = 10
     r = 2
 
     P = p * ((v_des - x_model[3])**2 + x_model[1]**2) # TODO

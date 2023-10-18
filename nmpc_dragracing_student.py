@@ -2,9 +2,9 @@ from sim import *
 from utils import *
 
 def nmpc_controller(kappa_table = None):
-    T = ## TODO, design your own planning horizon. 
-    N = ## TODO
-    h = ## TODO
+    T = None ## TODO, design your own planning horizon. 
+    N = None ## TODO
+    h = None ## TODO
     ###################### Modeling Start ######################
     # system dimensions
     Dim_state = 6
@@ -25,16 +25,16 @@ def nmpc_controller(kappa_table = None):
     Fb = 0.0
     ## 
     
-    af, ar   = ## TODO: refer to the car simulator to get the slip angle
-    Fzf, Fzr = ## TODO: refer to the car simulator to get the normal load distribution
-    Fxf, Fxr = ## TODO: refer to the car simulator to get the tire force distribution
+    af, ar   = None ## TODO: refer to the car simulator to get the slip angle
+    Fzf, Fzr = None ## TODO: refer to the car simulator to get the normal load distribution
+    Fxf, Fxr = None ## TODO: refer to the car simulator to get the tire force distribution
 
-    Fyf = ## TODO: use the modified tire force model tire_model_ctrl()
-    Fyr = ## TODO: use the modified tire force model tire_model_ctrl()
+    Fyf = None ## TODO: use the modified tire force model tire_model_ctrl()
+    Fyr = None ## TODO: use the modified tire force model tire_model_ctrl()
 
     dUx  = (Fxf * ca.cos(delta) - zm[0] * ca.sin(delta) + Fxr + Fd) / param["m"] + xm[2] * xm[1]
-    dUy  = ## TODO: refer to car simulator, replace Fxf and Fyf with auxiliary variable
-    dr   = ## TODO: refer to car simulator, replace Fxf and Fyf with auxiliary variable
+    dUy  = None ## TODO: refer to car simulator, replace Fxf and Fyf with auxiliary variable
+    dr   = None ## TODO: refer to car simulator, replace Fxf and Fyf with auxiliary variable
     
     dx   = ca.cos(xm[5]) * xm[0] - ca.sin(xm[5]) * xm[1]
     dy   = ca.sin(xm[5]) * xm[0] + ca.cos(xm[5]) * xm[1]
@@ -45,7 +45,7 @@ def nmpc_controller(kappa_table = None):
     Fun_dynmaics_dt = ca.Function('f_dt', [xm, um, zm], [xkp1])
 
     # enforce constraints for auxiliary variable z[0] = Fyf
-    alg  = ca.vertcat(# TODO, # TODO)
+    alg  = ca.vertcat(None) # TODO, # TODO)
     Fun_alg = ca.Function('alg', [xm, um, zm], [alg])
     
     ###################### MPC variables ######################
@@ -71,36 +71,36 @@ def nmpc_controller(kappa_table = None):
 
     ## state / inputs limits:
     for k in range(N):
-        ## TODO: minimal longitudinal speed
-        ## TODO: engine power limits
-        ## TODO: collision avoidance
+        None ## TODO: minimal longitudinal speed
+        None ## TODO: engine power limits
+        None ## TODO: collision avoidance
 
     ## friction cone constraints
     for k in range(N):
         Fx    = u[0, k]; delta = u[1, k]
-        af, ar = ## TODO 
-        Fzf, Fzr = ## TODO 
-        Fxf, Fxr = ## TODO 
+        af, ar = None ## TODO 
+        Fzf, Fzr = None ## TODO 
+        Fxf, Fxr = None ## TODO 
 
-        Fyf = ## TODO: use tire_model_ctrl or auxiliary variable z[2, k] z[3, k]
-        Fyr = ## TODO: use tire_model_ctrl or auxiliary variable z[2, k] z[3, k]
+        Fyf = None ## TODO: use tire_model_ctrl or auxiliary variable z[2, k] z[3, k]
+        Fyr = None ## TODO: use tire_model_ctrl or auxiliary variable z[2, k] z[3, k]
 
-        cons_ineq.append(## TODO: front tire limits)
-        cons_ineq.append(## TODO: reat  tire limits)        
+        cons_ineq.append(None) ## TODO: front tire limits)
+        cons_ineq.append(None) ## TODO: reat  tire limits)        
 
     ###################### MPC cost start ######################
     ## cost function design
     J = 0.0
-    J = J + ## TODO terminal cost
+    J = J + None ## TODO terminal cost
     
     ## road tracking 
     for k in range(N):
-        J = J + ## stage cost
+        J = J + None ## stage cost
  
     ## excessive slip angle / friction
     for k in range(N):
         Fx = u[0, k]; delta = u[1, k]
-        af, ar = get_slip_angle(# TODO)
+        af, ar = get_slip_angle(None) # TODO)
         Fzf, Fzr = normal_load(Fx, param)
         Fxf, Fxr = chi_fr(Fx)
 
@@ -121,9 +121,9 @@ def nmpc_controller(kappa_table = None):
         alpha_mod_r = ca.arctan(3 * Fyr_max / param["C_alpha_r"] * xi)
 
         ## limit friction penalty
-        J = J + ## TODO: Avoid front tire saturation
-        J = J + ## TODO: Avoid  rear tire saturation
-        J = J + ## TODO: Penalize slack variable for friction cone limits
+        J = J + None ## TODO: Avoid front tire saturation
+        J = J + None ## TODO: Avoid  rear tire saturation
+        J = J + None ## TODO: Penalize slack variable for friction cone limits
 
     # initial condition as parameters
     cons_init = [x[:, 0] - p]
@@ -132,8 +132,8 @@ def nmpc_controller(kappa_table = None):
 
     state_ub = np.array([ 1e2,  1e2,  1e2,  1e8,  1e8,  1e8])
     state_lb = np.array([-1e2, -1e2, -1e2, -1e8, -1e8, -1e8])
-    ctrl_ub  = np.array([ ## TODO,   ## TODO]) ## traction force | steering angle, use param["delta_max"]
-    ctrl_lb  = np.array([ ## TODO,   ## TODO])
+    ctrl_ub  = np.array([None, None]) ## TODO,   ## TODO]) ## traction force | steering angle, use param["delta_max"]
+    ctrl_lb  = np.array([None, None]) ## TODO,   ## TODO])
     aux_ub   = np.array([ 1e5,  1e5,  1e5,  1e5])
     aux_lb   = np.array([-1e5, -1e5, -1e5, -1e5])
 

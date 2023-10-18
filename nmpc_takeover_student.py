@@ -47,10 +47,10 @@ def nmpc_controller():
     # Keep in the same lane and take over it while maintaing a high speed
     p = 100
     q = 10
-    r = 1
+    r = 5
 
-    P = p * ((v_des - x_model[3])**2 + x_model[1]**2) # TODO
-    L = q * (v_des - x_model[3])**2 + q * xdot[1]**2 + q * xdot[2]**2 + q * x_model[1]**2 + r * u_model.T @ (ca.MX.eye(Dim_ctrl)) @ u_model # TODO
+    P = p * (v_des - x_model[3])**2 + 100*p * x_model[1]**2 # TODO
+    L = 3*q * (v_des - x_model[3])**2 + 2*q * xdot[1]**2 + q * xdot[2]**2 + q * x_model[1]**2 + r * u_model.T @ (ca.MX.eye(Dim_ctrl)) @ u_model # TODO
 
     Fun_cost_terminal = ca.Function('P', [x_model, par], [P])
     Fun_cost_running = ca.Function('Q', [x_model, u_model, par], [L])
@@ -87,7 +87,7 @@ def nmpc_controller():
     for k in range(N):
         #### collision avoidance:
         # TODO
-        dist = (x[0, k]/31)**2 + (x[1, k]/2.25)**2 - 1
+        dist = (x[0, k]/32)**2 + (x[1, k]/2.35)**2 - 1
         cons_state.append(-dist) # TODO)
 
         #### Maximum lateral acceleration ####

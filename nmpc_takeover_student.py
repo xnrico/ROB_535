@@ -6,7 +6,7 @@ import time
 
 def nmpc_controller():
     # Declare simulation constants
-    T = 8 # TODO: You are supposed to design the planning horizon
+    T = 6 # TODO: You are supposed to design the planning horizon
     N = 40 # TODO  You are supposed to design the planning horizon
     h = T / N # TODO: What is the time interval for simulation? 
 
@@ -50,7 +50,7 @@ def nmpc_controller():
     r = 2
 
     P = p * ((v_des - x_model[3])**2 + x_model[1]**2) # TODO
-    L = q * (v_des - x_model[3])**2 + q * xdot[1]**2 + q * xdot[2]**2 + q * x_model[1]**2 + r * u_model.T @ (ca.MX.eye(Dim_ctrl)) @ u_model # TODO
+    L = q * (v_des - x_model[3])**2 + q * xdot[1]**2 + q * xdot[2]**2 + q * x_model[1]**2 + r * u_model[0]**2 + 2*r *u_model[1] # TODO
 
     Fun_cost_terminal = ca.Function('P', [x_model, par], [P])
     Fun_cost_running = ca.Function('Q', [x_model, u_model, par], [L])

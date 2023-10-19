@@ -46,7 +46,7 @@ def nmpc_controller():
 
     # Keep in the same lane and take over it while maintaing a high speed
     p = 10000
-    q = 10
+    q = 1000
     r = 1
 
     P = p * ((v_des - x_model[3])**2 + x_model[1]**2) # TODO

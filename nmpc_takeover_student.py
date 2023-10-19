@@ -45,12 +45,12 @@ def nmpc_controller():
     u = ca.MX.sym('u', (Dim_ctrl , N)) # TODO
 
     # Keep in the same lane and take over it while maintaing a high speed
-    p = 10000
-    q = 1000
+    p = 1e6
+    q = 1e3
     r = 1
 
     P = p * ((v_des - x_model[3])**2 + x_model[1]**2) # TODO
-    L = q * (v_des - x_model[3])**2 + q * xdot[1]**2 + q * xdot[2]**2 + q * x_model[1]**2 + r * u_model[0]**2 + 0.5*r *u_model[1] # TODO
+    L = q * (v_des - x_model[3])**2 + q * xdot[1]**2 + q*0.01 * xdot[2]**2 + q*1e2 * x_model[1]**2 + r * u_model[0]**2 + 0.5*r *u_model[1] # TODO
 
     Fun_cost_terminal = ca.Function('P', [x_model, par], [P])
     Fun_cost_running = ca.Function('Q', [x_model, u_model, par], [L])

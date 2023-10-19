@@ -6,7 +6,7 @@ import time
 
 def nmpc_controller():
     # Declare simulation constants
-    T = 2 # TODO: You are supposed to design the planning horizon
+    T = 3 # TODO: You are supposed to design the planning horizon
     N = 40 # TODO  You are supposed to design the planning horizon
     h = T / N # TODO: What is the time interval for simulation? 
 
@@ -45,7 +45,7 @@ def nmpc_controller():
     u = ca.MX.sym('u', (Dim_ctrl , N)) # TODO
 
     # Keep in the same lane and take over it while maintaing a high speed
-    p = 100
+    p = 10000
     q = 10
     r = 1
 
@@ -87,7 +87,7 @@ def nmpc_controller():
     for k in range(N):
         #### collision avoidance:
         # TODO
-        dist = (x[0, k]/31.5)**2 + (x[1, k]/2.4)**2 - 1
+        dist = (x[0, k]/31.5)**2 + (x[1, k]/2.2)**2 - 1
         cons_state.append(-dist) # TODO)
 
         #### Maximum lateral acceleration ####

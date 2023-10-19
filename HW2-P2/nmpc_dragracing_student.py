@@ -4,7 +4,7 @@ from math import *
 
 def nmpc_controller(kappa_table = None):
     T = 3 ## TODO, design your own planning horizon. 
-    N = 30 ## TODO
+    N = 60 ## TODO
     h = T / N ## TODO
     ###################### Modeling Start ######################
     # system dimensions
@@ -45,8 +45,8 @@ def nmpc_controller(kappa_table = None):
     xkp1 = xdot * h + xm
     Fun_dynmaics_dt = ca.Function('f_dt', [xm, um, zm], [xkp1])
 
-    # enforce constraints for auxiliary variable z[0] = Fyf
-    alg  = ca.vertcat(Fyf, Fyr) # TODO, # TODO)
+    # enforce constraints for auxiliary variable z[0] = Fyf z[1] = Fyr
+    alg  = ca.vertcat(Fyf - zm[0], Fyr - zm[1]) # TODO, # TODO)
     Fun_alg = ca.Function('alg', [xm, um, zm], [alg])
     
     ###################### MPC variables ######################
@@ -83,8 +83,8 @@ def nmpc_controller(kappa_table = None):
         Fzf, Fzr = normal_load(Fx, param) ## TODO 
         Fxf, Fxr = chi_fr(Fx) ## TODO 
 
-        Fyf = tire_model_ctrl(af, Fzf, Fxf, param["C_alpha_f"], param["mu_f"]) ## TODO: use tire_model_ctrl or auxiliary variable z[2, k] z[3, k]
-        Fyr = tire_model_ctrl(ar, Fzr, Fxr, param["C_alpha_r"], param["mu_r"]) ## TODO: use tire_model_ctrl or auxiliary variable z[2, k] z[3, k]
+        Fyf = z[0, k] ## TODO: use tire_model_ctrl or auxiliary variable z[2, k] z[3, k]
+        Fyr = z[1, k] ## TODO: use tire_model_ctrl or auxiliary variable z[2, k] z[3, k]
 
         cons_ineq.append(Fyf**2 + Fxf**2 - (param["mu_f"]*Fzf)**2 - z[2, k]**2) ## TODO: front tire limits)
         cons_ineq.append(Fyr**2 + Fxr**2 - (param["mu_r"]*Fzr)**2 - z[3, k]**2) ## TODO: reat  tire limits)        
@@ -92,9 +92,9 @@ def nmpc_controller(kappa_table = None):
     ###################### MPC cost start ######################
     ## cost function design
     l = 100
-    q = 10
-    Wa = 1e6
-    Wz = 1e6
+    q = 1
+    Wa = 1e9
+    Wz = 1e9
 
     J = 0.0
     J = J + l * (x[4, -1]**2 + x[5, -1]**2 + (1e2 - x[0, -1])**2 + (1e2 - x[3, -1])**2) ## TODO terminal cost
@@ -126,10 +126,10 @@ def nmpc_controller(kappa_table = None):
         ## modified rear slide sliping angle
         alpha_mod_r = ca.arctan(3 * Fyr_max / param["C_alpha_r"] * xi)
 
-        J_af = Wa * ca.if_else(ca.fabs(af) >= alpha_mod_f,
+        J_af = Wa * ca.if_else(ca.fabs(af) > alpha_mod_f,
                                (ca.fabs(af) - alpha_mod_f)**2,
                                0)
-        J_ar = Wa * ca.if_else(ca.fabs(ar) >= alpha_mod_r,
+        J_ar = Wa * ca.if_else(ca.fabs(ar) > alpha_mod_r,
                                (ca.fabs(ar) - alpha_mod_r)**2,
                                0)
         
@@ -146,7 +146,7 @@ def nmpc_controller(kappa_table = None):
     state_ub = np.array([ 1e2,  1e2,  1e2,  1e8,  1e8,  1e8])
     state_lb = np.array([-1e2, -1e2, -1e2, -1e8, -1e8, -1e8])
     ctrl_ub  = np.array([param['Peng'] / 0.5, param['delta_max']]) ## TODO,   ## TODO]) ## traction force | steering angle, use param["delta_max"]
-    ctrl_lb  = np.array([-1e9, -param['delta_max']]) ## TODO,   ## TODO])
+    ctrl_lb  = np.array([0, -param['delta_max']]) ## TODO,   ## TODO])
     aux_ub   = np.array([ 1e5,  1e5,  1e5,  1e5])
     aux_lb   = np.array([-1e5, -1e5, -1e5, -1e5])
 

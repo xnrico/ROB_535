@@ -116,7 +116,7 @@ def nmpc_controller():
     lb_state_cons = np.zeros((len(cons_state), 1)) - 1e5
 
     # cost function: # NOTE: You can also hard code everything here
-    J = Fun_cost_terminal(x[:, -1], par) + p * ((x[3, -1]*np.sin(x[2, -1]+(np.arctan(L_r/(L_f+L_r)*np.arctan(u[1,-1])))))**2 + (x[3,-1]/L_r*np.sin(np.arctan(L_r/(L_f+L_r)*np.arctan(u[1,-1]))))**2)
+    J = Fun_cost_terminal(x[:, -1], par) # + p * ((x[3, -1]*np.sin(x[2, -1]+(np.arctan(L_r/(L_f+L_r)*np.arctan(u[1,-1])))))**2 + (x[3,-1]/L_r*np.sin(np.arctan(L_r/(L_f+L_r)*np.arctan(u[1,-1]))))**2)
     for k in range(N):
         J = J + Fun_cost_running(x[:, k], u[:, k], par)
 

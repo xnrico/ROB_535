@@ -46,8 +46,8 @@ def nmpc_controller(kappa_table = None):
     Fun_dynmaics_dt = ca.Function('f_dt', [xm, um, zm], [xkp1])
 
     # enforce constraints for auxiliary variable z[0] = Fyf z[1] = Fyr
-    alg  = ca.vertcat(Fyf - zm[0], Fyr - zm[1]) # TODO, # TODO)
-    Fun_alg = ca.Function('alg', [xm, um, zm], [alg])
+    # alg  = ca.vertcat(Fyf - zm[0], Fyr - zm[1]) # TODO, # TODO)
+    # Fun_alg = ca.Function('alg', [xm, um, zm], [alg])
     
     ###################### MPC variables ######################
     x = ca.MX.sym('x', (Dim_state, N + 1))
@@ -60,11 +60,21 @@ def nmpc_controller(kappa_table = None):
     cons_dynamics = []
     for k in range(N):
         xkp1 = Fun_dynmaics_dt(x[:, k], u[:, k], z[:, k])
-        Fy2  = Fun_alg(x[:, k], u[:, k], z[:, k])
+        # Fy2  = Fun_alg(x[:, k], u[:, k], z[:, k])
         for j in range(Dim_state):
             cons_dynamics.append(x[j, k+1] - xkp1[j])
-        for j in range(2):
-            cons_dynamics.append(Fy2[j])
+        # for j in range(2):
+            # cons_dynamics.append(Fy2[j])
+        Fx    = u[0, k]; delta = u[1, k]
+        af, ar = get_slip_angle(x[0, k], x[1, k], x[2, k], delta, param) ## TODO 
+        Fzf, Fzr = normal_load(Fx, param) ## TODO 
+        Fxf, Fxr = chi_fr(Fx) ## TODO 
+
+        Fyf = z[0, k] ## TODO: use tire_model_ctrl or auxiliary variable z[2, k] z[3, k]
+        Fyr = z[1, k] ## TODO: use tire_model_ctrl or auxiliary variable z[2, k] z[3, k]
+
+        cons_dynamics.append(z[0, k] - Fyf)
+        cons_dynamics.append(z[1, k] - Fyr)
     
     ## MPC inequality constraints ##
     # G(x) <= 0
@@ -73,7 +83,7 @@ def nmpc_controller(kappa_table = None):
     ## state / inputs limits:
     for k in range(N):
         cons_ineq.append(2 - x[0, k]) ## TODO: minimal longitudinal speed
-        cons_ineq.append(u[0, k] - param['Peng']/(x[0, k]+1e-2)) ## TODO: engine power limits
+        cons_ineq.append(u[0, k] - param['Peng']/(x[0, k])) ## TODO: engine power limits
         cons_ineq.append(1 - ((x[3, k] - 500)/10)**2 - (x[4, k]/10)**2) ## TODO: collision avoidance
 
     ## friction cone constraints
@@ -85,6 +95,8 @@ def nmpc_controller(kappa_table = None):
 
         Fyf = z[0, k] ## TODO: use tire_model_ctrl or auxiliary variable z[2, k] z[3, k]
         Fyr = z[1, k] ## TODO: use tire_model_ctrl or auxiliary variable z[2, k] z[3, k]
+        # Fyf = tire_model_ctrl(af, Fzf, Fxf, param["C_alpha_f"], param["mu_f"]) ## TODO: use the modified tire force model tire_model_ctrl()
+        # Fyr = tire_model_ctrl(ar, Fzr, Fxr, param["C_alpha_r"], param["mu_r"]) ## TODO: use the modified tire force model tire_model_ctrl()
 
         cons_ineq.append(Fyf**2 + Fxf**2 - (param["mu_f"]*Fzf)**2 - z[2, k]**2) ## TODO: front tire limits)
         cons_ineq.append(Fyr**2 + Fxr**2 - (param["mu_r"]*Fzr)**2 - z[3, k]**2) ## TODO: reat  tire limits)        
@@ -107,7 +119,7 @@ def nmpc_controller(kappa_table = None):
         J = J + q * x[4, k]**2
         J = J + q * x[5, k]**2
         J = J + q * (1e2 - x[0, k])**2
-        J = J + q * (2.5e3 - x[3, k])**2 ## TODO stage cost
+        J = J + q * (2e3 - x[3, k])**2 ## TODO stage cost
  
     ## excessive slip angle / friction
     for k in range(N):
@@ -152,7 +164,7 @@ def nmpc_controller(kappa_table = None):
     state_ub = np.array([ 1e2,  1e2,  1e2,  1e8,  1e8,  1e8])
     state_lb = np.array([-1e2, -1e2, -1e2, -1e8, -1e8, -1e8])
     ctrl_ub  = np.array([1e8, param['delta_max']]) ## TODO,   ## TODO]) ## traction force | steering angle, use param["delta_max"]
-    ctrl_lb  = np.array([-1e100, -param['delta_max']]) ## TODO,   ## TODO])
+    ctrl_lb  = np.array([-1e8, -param['delta_max']]) ## TODO,   ## TODO])
     aux_ub   = np.array([ 1e5,  1e5,  1e5,  1e5])
     aux_lb   = np.array([-1e5, -1e5, -1e5, -1e5])
 

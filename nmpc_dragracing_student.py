@@ -3,7 +3,7 @@ from utils import *
 from math import *
 
 def nmpc_controller(kappa_table = None):
-    T = 3 ## TODO, design your own planning horizon. 
+    T = 1 ## TODO, design your own planning horizon. 
     N = 30 ## TODO
     h = T / N ## TODO
     ###################### Modeling Start ######################
@@ -65,6 +65,7 @@ def nmpc_controller(kappa_table = None):
             cons_dynamics.append(x[j, k+1] - xkp1[j])
         # for j in range(2):
             # cons_dynamics.append(Fy2[j])
+
         Fx    = u[0, k]; delta = u[1, k]
         af, ar = get_slip_angle(x[0, k], x[1, k], x[2, k], delta, param) ## TODO 
         Fzf, Fzr = normal_load(Fx, param) ## TODO 
@@ -103,22 +104,22 @@ def nmpc_controller(kappa_table = None):
 
     ###################### MPC cost start ######################
     ## cost function design
-    l = 500
-    q = 10
+    l = 100
+    q = 100
     Wa = 1e8
     Wz = 1e8
 
     J = 0.0
-    J = J + l * x[4, -1]**2
+    J = J + 1000 * l * x[4, -1]**2
     J = J + l * x[5, -1]**2 
-    J = J + l * (1e2 - x[0, -1])**2 
-    J = J + l * (2.5e3 - x[3, -1])**2 ## TODO terminal cost
+    J = J + l * (1e3 - x[0, -1])**2 
+    J = J + l * (2e3 - x[3, -1])**2 ## TODO terminal cost
     
     ## road tracking 
     for k in range(N):
-        J = J + q * x[4, k]**2
+        J = J + 1000 * q * x[4, k]**2
         J = J + q * x[5, k]**2
-        J = J + q * (1e2 - x[0, k])**2
+        J = J + q * (1e3 - x[0, k])**2
         J = J + q * (2e3 - x[3, k])**2 ## TODO stage cost
  
     ## excessive slip angle / friction

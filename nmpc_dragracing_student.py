@@ -99,17 +99,17 @@ def nmpc_controller(kappa_table = None):
     Wz = 1e8
 
     J = 0.0
-    J = J + 3*l * x[4, -1]**2
-    J = J + l * x[5, -1]**2 
-    J = J + l * (1e3 - x[0, -1])**2 
-    J = J + l * (2e4 - x[3, -1])**2 ## TODO terminal cost
+    J = J + l * x[4, -1]**2 # Y -> 0
+    J = J + l * x[5, -1]**2 # Yaw -> 0
+    J = J + (2e2 - x[0, -1])**2 # Ux -> 200 (Large Speed)
+    # J = J + (3e3 - x[3, -1])**2 # X -> 20000 (Far Away) ## TODO terminal cost
     
     ## road tracking 
     for k in range(N):
-        J = J + 5*q * x[4, k]**2
-        J = J + q * x[5, k]**2
-        J = J + q * (1e3 - x[0, k])**2
-        J = J + q * (2e4 - x[3, k])**2 ## TODO stage cost
+        J = J + 2*q * x[4, k]**2 # Y => 0
+        J = J + 2*q * x[5, k]**2 # Yaw -> 0
+        J = J + 2*(2e2 - x[0, k])**2 # Ux -> 200 (Large Speed)
+        # J = J + q * (2e4 - x[3, k])**2 # X -> 20000 (Far Away) ## TODO stage cost
  
     ## excessive slip angle / friction
     for k in range(N):

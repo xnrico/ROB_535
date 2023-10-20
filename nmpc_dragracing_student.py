@@ -45,8 +45,8 @@ def nmpc_controller(kappa_table = None):
     xkp1 = xdot * h + xm
     Fun_dynmaics_dt = ca.Function('f_dt', [xm, um, zm], [xkp1])
 
-    # enforce constraints for auxiliary variable z[0] = Fyf
-    alg  = ca.vertcat(Fyf, Fyr) # TODO, # TODO)
+    # enforce constraints for auxiliary variable z[0] = Fyf z[1] = Fyr
+    alg  = ca.vertcat(Fyf - zm[0], Fyr - zm[1]) # TODO, # TODO)
     Fun_alg = ca.Function('alg', [xm, um, zm], [alg])
     
     ###################### MPC variables ######################
@@ -83,25 +83,31 @@ def nmpc_controller(kappa_table = None):
         Fzf, Fzr = normal_load(Fx, param) ## TODO 
         Fxf, Fxr = chi_fr(Fx) ## TODO 
 
-        Fyf = tire_model_ctrl(af, Fzf, Fxf, param["C_alpha_f"], param["mu_f"]) ## TODO: use tire_model_ctrl or auxiliary variable z[2, k] z[3, k]
-        Fyr = tire_model_ctrl(ar, Fzr, Fxr, param["C_alpha_r"], param["mu_r"]) ## TODO: use tire_model_ctrl or auxiliary variable z[2, k] z[3, k]
+        Fyf = z[0, k] ## TODO: use tire_model_ctrl or auxiliary variable z[2, k] z[3, k]
+        Fyr = z[1, k] ## TODO: use tire_model_ctrl or auxiliary variable z[2, k] z[3, k]
 
         cons_ineq.append(Fyf**2 + Fxf**2 - (param["mu_f"]*Fzf)**2 - z[2, k]**2) ## TODO: front tire limits)
         cons_ineq.append(Fyr**2 + Fxr**2 - (param["mu_r"]*Fzr)**2 - z[3, k]**2) ## TODO: reat  tire limits)        
 
     ###################### MPC cost start ######################
     ## cost function design
-    l = 100
+    l = 500
     q = 10
-    Wa = 1e6
-    Wz = 1e6
+    Wa = 1e8
+    Wz = 1e8
 
     J = 0.0
-    J = J + l * (x[4, -1]**2 + x[5, -1]**2 + (1e2 - x[0, -1])**2 + (1e2 - x[3, -1])**2) ## TODO terminal cost
+    J = J + l * x[4, -1]**2
+    J = J + l * x[5, -1]**2 
+    J = J + l * (1e2 - x[0, -1])**2 
+    J = J + l * (2.5e3 - x[3, -1])**2 ## TODO terminal cost
     
     ## road tracking 
     for k in range(N):
-        J = J + q * (x[4, k]**2 + x[5, k]**2 + (1e2 - x[0, k])**2 + (1e2 - x[3, k])**2) ## TODO stage cost
+        J = J + q * x[4, k]**2
+        J = J + q * x[5, k]**2
+        J = J + q * (1e2 - x[0, k])**2
+        J = J + q * (2.5e3 - x[3, k])**2 ## TODO stage cost
  
     ## excessive slip angle / friction
     for k in range(N):
@@ -126,17 +132,17 @@ def nmpc_controller(kappa_table = None):
         ## modified rear slide sliping angle
         alpha_mod_r = ca.arctan(3 * Fyr_max / param["C_alpha_r"] * xi)
 
-        J_af = Wa * ca.if_else(ca.fabs(af) >= alpha_mod_f,
+        J_af = ca.if_else(ca.fabs(af) >= alpha_mod_f,
                                (ca.fabs(af) - alpha_mod_f)**2,
                                0)
-        J_ar = Wa * ca.if_else(ca.fabs(ar) >= alpha_mod_r,
+        J_ar = ca.if_else(ca.fabs(ar) >= alpha_mod_r,
                                (ca.fabs(ar) - alpha_mod_r)**2,
                                0)
         
         ## limit friction penalty
-        J = J + J_af ## TODO: Avoid front tire saturation
-        J = J + J_ar ## TODO: Avoid  rear tire saturation
-        J = J + Wz * (z[0, k]**2 + z[1, k]**2) ## TODO: Penalize slack variable for friction cone limits
+        J = J + Wa * J_af ## TODO: Avoid front tire saturation
+        J = J + Wa * J_ar ## TODO: Avoid  rear tire saturation
+        J = J + Wz * (z[2, k]**2 + z[3, k]**2) ## TODO: Penalize slack variable for friction cone limits
 
     # initial condition as parameters
     cons_init = [x[:, 0] - p]
@@ -145,8 +151,8 @@ def nmpc_controller(kappa_table = None):
 
     state_ub = np.array([ 1e2,  1e2,  1e2,  1e8,  1e8,  1e8])
     state_lb = np.array([-1e2, -1e2, -1e2, -1e8, -1e8, -1e8])
-    ctrl_ub  = np.array([param['Peng'] / 0.5, param['delta_max']]) ## TODO,   ## TODO]) ## traction force | steering angle, use param["delta_max"]
-    ctrl_lb  = np.array([-1e9, -param['delta_max']]) ## TODO,   ## TODO])
+    ctrl_ub  = np.array([1e8, param['delta_max']]) ## TODO,   ## TODO]) ## traction force | steering angle, use param["delta_max"]
+    ctrl_lb  = np.array([-1e100, -param['delta_max']]) ## TODO,   ## TODO])
     aux_ub   = np.array([ 1e5,  1e5,  1e5,  1e5])
     aux_lb   = np.array([-1e5, -1e5, -1e5, -1e5])
 

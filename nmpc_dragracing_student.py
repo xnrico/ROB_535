@@ -3,7 +3,7 @@ from utils import *
 from math import *
 
 def nmpc_controller(kappa_table = None):
-    T = 1 ## TODO, design your own planning horizon. 
+    T = 3. ## TODO, design your own planning horizon. 
     N = 30 ## TODO
     h = T / N ## TODO
     ###################### Modeling Start ######################
@@ -46,8 +46,8 @@ def nmpc_controller(kappa_table = None):
     Fun_dynmaics_dt = ca.Function('f_dt', [xm, um, zm], [xkp1])
 
     # enforce constraints for auxiliary variable z[0] = Fyf z[1] = Fyr
-    # alg  = ca.vertcat(Fyf - zm[0], Fyr - zm[1]) # TODO, # TODO)
-    # Fun_alg = ca.Function('alg', [xm, um, zm], [alg])
+    alg  = ca.vertcat(zm[0] - Fyf, zm[1] - Fyr) # TODO, # TODO)
+    Fun_alg = ca.Function('alg', [xm, um, zm], [alg])
     
     ###################### MPC variables ######################
     x = ca.MX.sym('x', (Dim_state, N + 1))
@@ -60,23 +60,12 @@ def nmpc_controller(kappa_table = None):
     cons_dynamics = []
     for k in range(N):
         xkp1 = Fun_dynmaics_dt(x[:, k], u[:, k], z[:, k])
-        # Fy2  = Fun_alg(x[:, k], u[:, k], z[:, k])
+        Fy2  = Fun_alg(x[:, k], u[:, k], z[:, k])
         for j in range(Dim_state):
             cons_dynamics.append(x[j, k+1] - xkp1[j])
-        # for j in range(2):
-            # cons_dynamics.append(Fy2[j])
+        for j in range(2):
+            cons_dynamics.append(Fy2[j])
 
-        Fx    = u[0, k]; delta = u[1, k]
-        af, ar = get_slip_angle(x[0, k], x[1, k], x[2, k], delta, param) ## TODO 
-        Fzf, Fzr = normal_load(Fx, param) ## TODO 
-        Fxf, Fxr = chi_fr(Fx) ## TODO 
-
-        Fyf = z[0, k] ## TODO: use tire_model_ctrl or auxiliary variable z[2, k] z[3, k]
-        Fyr = z[1, k] ## TODO: use tire_model_ctrl or auxiliary variable z[2, k] z[3, k]
-
-        cons_dynamics.append(z[0, k] - Fyf)
-        cons_dynamics.append(z[1, k] - Fyr)
-    
     ## MPC inequality constraints ##
     # G(x) <= 0
     cons_ineq = []
@@ -84,7 +73,7 @@ def nmpc_controller(kappa_table = None):
     ## state / inputs limits:
     for k in range(N):
         cons_ineq.append(2 - x[0, k]) ## TODO: minimal longitudinal speed
-        cons_ineq.append(u[0, k] - param['Peng']/(x[0, k])) ## TODO: engine power limits
+        cons_ineq.append(u[0, k]*x[0, k] - param['Peng']) ## TODO: engine power limits
         cons_ineq.append(1 - ((x[3, k] - 500)/10)**2 - (x[4, k]/10)**2) ## TODO: collision avoidance
 
     ## friction cone constraints
@@ -94,10 +83,10 @@ def nmpc_controller(kappa_table = None):
         Fzf, Fzr = normal_load(Fx, param) ## TODO 
         Fxf, Fxr = chi_fr(Fx) ## TODO 
 
-        Fyf = z[0, k] ## TODO: use tire_model_ctrl or auxiliary variable z[2, k] z[3, k]
-        Fyr = z[1, k] ## TODO: use tire_model_ctrl or auxiliary variable z[2, k] z[3, k]
-        # Fyf = tire_model_ctrl(af, Fzf, Fxf, param["C_alpha_f"], param["mu_f"]) ## TODO: use the modified tire force model tire_model_ctrl()
-        # Fyr = tire_model_ctrl(ar, Fzr, Fxr, param["C_alpha_r"], param["mu_r"]) ## TODO: use the modified tire force model tire_model_ctrl()
+        # Fyf = z[0, k] ## TODO: use tire_model_ctrl or auxiliary variable z[0, k] z[1, k]
+        # Fyr = z[1, k] ## TODO: use tire_model_ctrl or auxiliary variable z[0, k] z[1, k]
+        Fyf = tire_model_ctrl(af, Fzf, Fxf, param["C_alpha_f"], param["mu_f"]) ## TODO: use the modified tire force model tire_model_ctrl()
+        Fyr = tire_model_ctrl(ar, Fzr, Fxr, param["C_alpha_r"], param["mu_r"]) ## TODO: use the modified tire force model tire_model_ctrl()
 
         cons_ineq.append(Fyf**2 + Fxf**2 - (param["mu_f"]*Fzf)**2 - z[2, k]**2) ## TODO: front tire limits)
         cons_ineq.append(Fyr**2 + Fxr**2 - (param["mu_r"]*Fzr)**2 - z[3, k]**2) ## TODO: reat  tire limits)        
@@ -105,22 +94,22 @@ def nmpc_controller(kappa_table = None):
     ###################### MPC cost start ######################
     ## cost function design
     l = 100
-    q = 100
+    q = 10
     Wa = 1e8
     Wz = 1e8
 
     J = 0.0
-    J = J + 1000 * l * x[4, -1]**2
+    J = J + 3*l * x[4, -1]**2
     J = J + l * x[5, -1]**2 
     J = J + l * (1e3 - x[0, -1])**2 
-    J = J + l * (2e3 - x[3, -1])**2 ## TODO terminal cost
+    J = J + l * (2e4 - x[3, -1])**2 ## TODO terminal cost
     
     ## road tracking 
     for k in range(N):
-        J = J + 1000 * q * x[4, k]**2
+        J = J + 5*q * x[4, k]**2
         J = J + q * x[5, k]**2
         J = J + q * (1e3 - x[0, k])**2
-        J = J + q * (2e3 - x[3, k])**2 ## TODO stage cost
+        J = J + q * (2e4 - x[3, k])**2 ## TODO stage cost
  
     ## excessive slip angle / friction
     for k in range(N):
